@@ -17,18 +17,13 @@ require_once (__DIR__ . '/sdks/alipay/AopSdk.php');
 
 class Alipay extends Object
 {
-    /*
-     * @var string alipay gateway url
-     */
-    public $gatewayUrl = 'https://openapi.alipay.com/gateway.do';
-
     public $appid;
 
     /*
      * @var string alipay public key
      * the public key should remove the header and footer, one line
      */
-    public $alipayRsaPubKey;
+    public $alipayRsaPublicKey;
 
     /*
      * @var string developer private key
@@ -36,16 +31,32 @@ class Alipay extends Object
      */
     public $merchantRsaPrivateKey;
 
-    public $charset = 'UTF-8';
-
-    public $signType = 'RSA2';
-
-    const PRODUCT_CODE = 'QUICK_MSECURITY_PAY';
+    /*
+     * @var string developer private key file path
+     */
+    public $merchantRsaPrivateKeyFile = null;
 
     /*
      * @var string alipay callback url
      */
     public $notifyUrl;
+
+    /*
+     * @var string alipay gateway url
+     */
+    public $gatewayUrl = 'https://openapi.alipay.com/gateway.do';
+
+
+    /*
+     * @var string response format
+     */
+    public $format = 'json';
+
+    public $charset = 'UTF-8';
+
+    public $signType = 'RSA2';
+
+    const PRODUCT_CODE = 'QUICK_MSECURITY_PAY';
 
     /*
      * @var string order id
@@ -89,5 +100,34 @@ class Alipay extends Object
         $aop->alipayrsaPublicKey = $this->alipayRsaPublicKey;
 
         return $aop->rsaCheckV1($postData, null, 'RSA');
+    }
+
+    public function init()
+    {
+        parent::init();
+
+        if ($this->merchantRsaPrivateKeyFile !== null) {
+            if (!is_file($this->merchantRsaPrivateKeyFile)) {
+                throw new RsaKeyFileNotFoundException('商户密钥文件：' . $this->merchantRsaPrivateKeyFile . ' 不存在');
+            }
+
+            $fd = fopen($this->merchantRsaPrivateKeyFile, 'r');
+            $key = '';
+            while (!feof($fd)) {
+                $line = trim(fread($fd, 4096));
+                if (!$line ||substr($line, 0, 4) === '----') {
+                    continue;
+                }
+
+                $key .= $line;
+            }
+
+            $this->merchantRsaPrivateKey = $key;
+            fclose($fd);
+        }
+
+        if (!$this->merchantRsaPrivateKey) {
+            throw new RsaKeyNotSetException('商户密钥未配置！');
+        }
     }
 }
