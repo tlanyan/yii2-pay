@@ -8,7 +8,7 @@ Composer:
 
     composer require 'tlanyan/yii2-pay:*'
 
-or add the following line to the composer.json:
+or add the following line to the `require` section of your composer.json:
 
     "tlanyan/yii2-pay": "*"
 
