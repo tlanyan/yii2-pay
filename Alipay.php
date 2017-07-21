@@ -19,35 +19,35 @@ class Alipay extends Object
 {
     public $appid;
 
-    /*
+    /**
      * @var string alipay public key
      * the public key should remove the header and footer, one line
      */
     public $alipayRsaPublicKey;
 
-    /*
+    /**
      * @var string developer private key
      * the private key should remove the header and footer, one line
      */
     public $merchantRsaPrivateKey;
 
-    /*
+    /**
      * @var string developer private key file path
      */
     public $merchantRsaPrivateKeyFile = null;
 
-    /*
+    /**
      * @var string alipay callback url
      */
     public $notifyUrl;
 
-    /*
+    /**
      * @var string alipay gateway url
      */
     public $gatewayUrl = 'https://openapi.alipay.com/gateway.do';
 
 
-    /*
+    /**
      * @var string response format
      */
     public $format = 'json';
@@ -58,7 +58,8 @@ class Alipay extends Object
 
     const PRODUCT_CODE = 'QUICK_MSECURITY_PAY';
 
-    /*
+    /**
+     * get pay parameter for the client
      * @var string order id
      * @var string order subject
      * @var string amount
@@ -94,12 +95,17 @@ class Alipay extends Object
         return $response;
     }
 
-    public function checkCallbackData(array $postData)
+    /**
+     * check the sign of callback data
+     * @var array $data the post data array
+     * @return boolean
+     */
+    public function checkSign(array $data)
     {
         $aop = new AopClient();
         $aop->alipayrsaPublicKey = $this->alipayRsaPublicKey;
 
-        return $aop->rsaCheckV1($postData, null, 'RSA');
+        return $aop->rsaCheckV1($data, null, 'RSA');
     }
 
     public function init()

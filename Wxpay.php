@@ -17,14 +17,37 @@ class Wxpay extends Object
 {
     public $appid;
     public $appkey;
+
+    /**
+     * @var merchant id
+     */
     public $mchid;
 
+    /**
+     * @var Wxpay callback url
+     */
     public $notifyUrl;
 
+    /**
+     * @var sign generate algorithm
+     */
     public $signType = 'HMAC-SHA256';
 
+    /**
+     * @const the gate way to get prepay id
+     */
     const ORDER_URL = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
 
+    /**
+     * get the pay parameter for the client
+     * @var int $orderId
+     * @var float $amount
+     * @var string $body brief of trade
+     * @var string $ip the client ip to pay
+     * @var string $detail detail of this trade
+     * @var string $tradeType
+     * @return string prepay id
+     */
     public function getPayParameter(int $orderId, float $amount, string $body, string $ip, string $detail = '', string $tradeType = 'APP')
     {
         $postData = [
@@ -35,6 +58,7 @@ class Wxpay extends Object
             'notify_url' => $this->notifyUrl,
             'out_trade_no' => $orderId,
             'spbill_create_ip' => $ip,
+            'sign_type' => $this->signType,
             'total_fee' => $amount,
             'trade_type' => $tradeType,
         ];
@@ -59,6 +83,10 @@ class Wxpay extends Object
         }
     }
 
+    /**
+     * @var array $data the array to generate sign
+     * @return string
+     */
     private function getSign($data)
     {
         $data = array_filter($data);
@@ -71,6 +99,23 @@ class Wxpay extends Object
         } else {
             return strtoupper(md5($stringSignTemp));
         }
+    }
+
+    /**
+     * check the integrity of the callback post data
+     * @var array $data the post data array
+     * @return boolean
+     */
+    public function checkSign($data)
+    {
+        $sign = $data['sign'];
+        unset($data['sign']);
+
+        if ($this->getSign($data) === $sign) {
+            return true;
+        }
+
+        return false;
     }
 
     public function init()

@@ -1,6 +1,6 @@
 # yii2-pay
 
-Yii2 pay component.
+Yii2 pay component, support [Alipay](https://alipay.com) and [Wxpay](https://pay.weixin.qq.com).
 
 ## Install
 
@@ -13,8 +13,6 @@ or add the following line to the `require` section of your composer.json:
     "tlanyan/yii2-pay": "*"
 
 ## Channels
-
-This library support Wxpay and Alipay.
 
 ### Alipay
 
@@ -47,3 +45,30 @@ Alipay component accept these parameters:
 - notifyUrl: optional, Alipay call back URL.
 - signType: optional, valid values are: 'RSA', 'RSA2'. Default value is 'RSA2'.
 
+****
+### Wxpay
+
+#### Usage
+
+Append the following codes to the `components` array in the config file:
+
+    'components' => [
+        // other components,
+        'wxpay' => [
+            'class' => 'tlanyan\Wxpay',
+                'appid' => 'your appid',
+                'appkey' => 'app secret',
+                'mchid' => 'merchant id',
+                'notifyUrl' => 'Wxpay call back url',
+        ],
+    ],
+
+#### Options
+
+Wxpay component accept these parameters:
+
+- appid: **required**, the assigned appid by Wxpay.
+- appsecret: **required**, the app secret set in the merchant center.
+- mchid: **required**, the merchant id.
+- notifyUrl: **required**, Wxpay call back URL.
+- signType: optional, valid values are: 'MD5', 'HMAC-SHA256'. Default value is 'HMAC-SHA256'.
