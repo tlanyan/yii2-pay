@@ -87,7 +87,7 @@ class Wxpay extends Object
      * @var array $data the array to generate sign
      * @return string
      */
-    private function getSign($data)
+    public function getSign($data)
     {
         $data = array_filter($data);
         ksort($data);
