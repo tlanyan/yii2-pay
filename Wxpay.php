@@ -52,8 +52,8 @@ class Wxpay extends Object
     {
         $postData = [
             'appid' => $this->appid,
-            'body' => $this->body,
-            'mach_id' => $this->mchid,
+            'body' => $body,
+            'mch_id' => $this->mchid,
             'nonce_str' => Yii::$app->security->generateRandomString(32),
             'notify_url' => $this->notifyUrl,
             'out_trade_no' => $orderId,
@@ -74,10 +74,11 @@ class Wxpay extends Object
             ->send();
         if ($response->isOk) {
             $data = $response->data;
+            Yii::info($data, 'pay-data');
             if ($data['return_code'] === 'SUCCESS') {
                 return $data['prepay_id'];
             } else {
-                Yii::error($data);
+                Yii::error($data, 'wxpay');
                 return null;
             }
         }
@@ -91,8 +92,11 @@ class Wxpay extends Object
     {
         $data = array_filter($data);
         ksort($data);
-        $stringA = http_build_query($data);
-        $stringSignTemp = $stringA . '&key=' . $this->appkey;
+        $stringA = '';
+        foreach ($data as $key => $value) {
+            $stringA .= $key . '=' . $value . '&';
+        }
+        $stringSignTemp = $stringA . 'key=' . $this->appkey;
 
         if ($this->signType === 'HMAC-SHA256') {
             return hash_hmac('sha256', $stringSignTemp, $this->appkey);
