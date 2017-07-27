@@ -59,7 +59,7 @@ class Wxpay extends Object
             'out_trade_no' => $orderId,
             'spbill_create_ip' => $ip,
             'sign_type' => $this->signType,
-            'total_fee' => $amount,
+            'total_fee' => $amount * 100,   // the unit is fen
             'trade_type' => $tradeType,
         ];
 
