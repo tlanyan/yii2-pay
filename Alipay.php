@@ -105,7 +105,7 @@ class Alipay extends Object
         $aop = new AopClient();
         $aop->alipayrsaPublicKey = $this->alipayRsaPublicKey;
 
-        return $aop->rsaCheckV1($data, null, 'RSA');
+        return $aop->rsaCheckV1($data, null, $this->signType);
     }
 
     public function init()
