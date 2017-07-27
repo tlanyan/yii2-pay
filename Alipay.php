@@ -120,8 +120,8 @@ class Alipay extends Object
             $fd = fopen($this->merchantRsaPrivateKeyFile, 'r');
             $key = '';
             while (!feof($fd)) {
-                $line = trim(fread($fd, 4096));
-                if (!$line ||substr($line, 0, 4) === '----') {
+                $line = trim(fgets($fd, 4096));
+                if (!$line || substr($line, 0, 4) === '----') {
                     continue;
                 }
 

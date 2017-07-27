@@ -74,7 +74,7 @@ class Wxpay extends Object
             ->send();
         if ($response->isOk) {
             $data = $response->data;
-            Yii::info($data, 'pay-data');
+            Yii::info($data, 'wxpay');
             if ($data['return_code'] === 'SUCCESS') {
                 return $data['prepay_id'];
             } else {
@@ -99,10 +99,12 @@ class Wxpay extends Object
         $stringSignTemp = $stringA . 'key=' . $this->appkey;
 
         if ($this->signType === 'HMAC-SHA256') {
-            return hash_hmac('sha256', $stringSignTemp, $this->appkey);
+            $sign = hash_hmac('sha256', $stringSignTemp, $this->appkey);
         } else {
-            return strtoupper(md5($stringSignTemp));
+            $sign = md5($stringSignTemp);
         }
+
+        return strtoupper($sign);
     }
 
     /**
