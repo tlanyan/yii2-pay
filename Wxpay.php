@@ -48,7 +48,7 @@ class Wxpay extends Object
      * @var string $tradeType
      * @return string prepay id
      */
-    public function getPayParameter(int $orderId, float $amount, string $body, string $ip, string $detail = '', string $tradeType = 'APP')
+    public function getPayParameter(int $orderId, int $amount, string $body, string $ip, string $detail = '', string $tradeType = 'APP')
     {
         $postData = [
             'appid' => $this->appid,
@@ -59,7 +59,7 @@ class Wxpay extends Object
             'out_trade_no' => $orderId,
             'spbill_create_ip' => $ip,
             'sign_type' => $this->signType,
-            'total_fee' => $amount * 100,   // the unit is fen
+            'total_fee' => $amount,
             'trade_type' => $tradeType,
         ];
 
