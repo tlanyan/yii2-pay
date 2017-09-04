@@ -56,6 +56,11 @@ class Alipay extends Object
 
     public $signType = 'RSA2';
 
+	/**
+	 * @var string log category
+	 */
+    public $logCategory = 'alipay';
+
     const PRODUCT_CODE = 'QUICK_MSECURITY_PAY';
 
     /**
@@ -65,6 +70,7 @@ class Alipay extends Object
      * @var string amount
      * @var string body the description of the order, max length is 128
      * @var string order close timeout
+     * @return string pay string used by client
      */
     public function getPayParameter(string $orderId, string $subject, string $amount, string $body, string $timeoutExpress = '30m')
     {
@@ -72,9 +78,13 @@ class Alipay extends Object
 
         $aop->gatewayUrl = $this->gatewayUrl;
         $aop->appId = $this->appid;
-        $aop->rsaPrivateKey = $this->merchantRsaPrivateKey;
+	    if ($this->merchantRsaPrivateKeyFile) {
+		    $aop->rsaPrivateKeyFilePath = $this->merchantRsaPrivateKeyFile;
+	    } else {
+		    $aop->rsaPrivateKey = $this->merchantRsaPrivateKey;
+	    }
         $aop->format = $this->format;
-        $aop->charset = $this->signType;
+        $aop->postCharset = $this->charset;
         $aop->signType = $this->signType;
         $aop->alipayrsaPublicKey = $this->alipayRsaPublicKey;
 
@@ -92,6 +102,7 @@ class Alipay extends Object
         //这里和普通的接口调用不同，使用的是sdkExecute
         $response = $aop->sdkExecute($request);
 
+        Yii::info($response, $this->logCategory);
         return $response;
     }
 
@@ -114,25 +125,11 @@ class Alipay extends Object
 
         if ($this->merchantRsaPrivateKeyFile !== null) {
             if (!is_file($this->merchantRsaPrivateKeyFile)) {
-                throw new RsaKeyFileNotFoundException('商户密钥文件：' . $this->merchantRsaPrivateKeyFile . ' 不存在');
+                throw new RsaKeyNotSetException('商户密钥文件：' . $this->merchantRsaPrivateKeyFile . ' 不存在');
             }
-
-            $fd = fopen($this->merchantRsaPrivateKeyFile, 'r');
-            $key = '';
-            while (!feof($fd)) {
-                $line = trim(fgets($fd, 4096));
-                if (!$line || substr($line, 0, 4) === '----') {
-                    continue;
-                }
-
-                $key .= $line;
-            }
-
-            $this->merchantRsaPrivateKey = $key;
-            fclose($fd);
         }
 
-        if (!$this->merchantRsaPrivateKey) {
+        if (!$this->merchantRsaPrivateKey && !$this->merchantRsaPrivateKeyFile) {
             throw new RsaKeyNotSetException('商户密钥未配置！');
         }
     }

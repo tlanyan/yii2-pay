@@ -33,6 +33,8 @@ class Wxpay extends Object
      */
     public $signType = 'HMAC-SHA256';
 
+    public $logCategory = 'wxpay';
+
     /**
      * @const the gate way to get prepay id
      */
@@ -46,7 +48,7 @@ class Wxpay extends Object
      * @var string $ip the client ip to pay
      * @var string $detail detail of this trade
      * @var string $tradeType
-     * @return string prepay id
+     * @return array
      */
     public function getPayParameter(int $orderId, int $amount, string $body, string $ip, string $detail = '', string $tradeType = 'APP')
     {
@@ -74,12 +76,24 @@ class Wxpay extends Object
             ->send();
         if ($response->isOk) {
             $data = $response->data;
-            Yii::info($data, 'wxpay');
+            Yii::info($data, $this->logCategory);
             if ($data['return_code'] === 'SUCCESS') {
-                return $data['prepay_id'];
+            	if ($data['result_code'] === 'SUCCESS') {
+            		return [
+            			'code' => 0,
+			            'prepayid' => $data['prepay_id'],
+		            ];
+	            }
+	            return [
+	            	'code' => 1,
+		            'message' => $data['err_code_des'],
+	            ];
             } else {
-                Yii::error($data, 'wxpay');
-                return null;
+                Yii::error($data, $this->logCategory);
+	            return [
+		            'code' => 1,
+		            'message' => 'fail to communicate with wxpay server',
+	            ];
             }
         }
     }

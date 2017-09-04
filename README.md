@@ -30,6 +30,7 @@ Append the following codes to the `components` array in the config file:
                 'merchantRsaPrivateKeyFile' => 'file path to your private key',
                 'alipayRsaPublicKey' => 'the alipay public rsa key',
                 'notifyUrl' => 'alipay call back url',
+                'logCategory' => 'log category',
         ],
     ],
 
@@ -44,6 +45,7 @@ Alipay component accept these parameters:
 - format: optional, Alipay response format. Valid values are: 'json'.
 - notifyUrl: optional, Alipay call back URL.
 - signType: optional, valid values are: 'RSA', 'RSA2'. Default value is 'RSA2'.
+- logCategory: optional, log category. Default value is 'alipay'.
 
 ****
 ### Wxpay
@@ -60,6 +62,7 @@ Append the following codes to the `components` array in the config file:
                 'appkey' => 'app secret',
                 'mchid' => 'merchant id',
                 'notifyUrl' => 'Wxpay call back url',
+                'logCategory' => 'log category',
         ],
     ],
 
@@ -72,3 +75,4 @@ Wxpay component accept these parameters:
 - mchid: **required**, the merchant id.
 - notifyUrl: **required**, Wxpay call back URL.
 - signType: optional, valid values are: 'MD5', 'HMAC-SHA256'. Default value is 'HMAC-SHA256'.
+- logCategory: optional, log category. Default value is 'wxpay'.
