@@ -9,6 +9,7 @@
 
 namespace tlanyan;
 
+use Yii;
 use AopClient;
 use yii\base\Object;
 use AlipayTradeAppPayRequest;
