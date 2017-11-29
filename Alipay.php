@@ -54,6 +54,9 @@ class Alipay extends Object
      */
     public $format = 'json';
 
+	/**
+	 * @var string charset
+	 */
     public $charset = 'UTF-8';
 
     public $signType = 'RSA2';
@@ -62,6 +65,11 @@ class Alipay extends Object
 	 * @var string log category
 	 */
     public $logCategory = 'alipay';
+
+	/**
+	 * @var string order timeout time
+	 */
+    public $timeoutExpress = "2h";
 
     const APP_PRODUCT_CODE = 'QUICK_MSECURITY_PAY';
 
@@ -95,7 +103,7 @@ class Alipay extends Object
 	 * @var string order close timeout
 	 * @return string pay string used by client
 	 */
-	public function getAppPayParameter(string $orderId, string $subject, string $amount, string $body, string $timeoutExpress = '2h')
+	public function getAppPayParameter(string $orderId, string $subject, string $amount, string $body)
 	{
 		$aopClient = $this->getAopClient();
 
@@ -104,7 +112,7 @@ class Alipay extends Object
 			'subject' => $subject,
 			'out_trade_no' => $orderId,
 			'body' => $body,
-			'timeout_express' => $timeoutExpress,
+			'timeout_express' => $this->timeoutExpress,
 			'total_amount' => $amount,
 			'product_code' => self::APP_PRODUCT_CODE,
 		];
@@ -135,7 +143,7 @@ class Alipay extends Object
 			'subject' => $subject,
 			'out_trade_no' => $orderId,
 			'body' => $body,
-			'timeout_express' => '2h',
+			'timeout_express' => $this->timeoutExpress,
 			'total_amount' => $amount,
 			'product_code' => self::WAP_PRODUCT_CODE,
 		];

@@ -90,12 +90,13 @@ class Wxpay extends Object
 	            ];
             } else {
                 Yii::error($data, $this->logCategory);
-	            return [
-		            'code' => 1,
-		            'message' => 'fail to communicate with wxpay server',
-	            ];
             }
         }
+
+	    return [
+		    'code' => 1,
+		    'message' => 'fail to communicate with wxpay server',
+	    ];
     }
 
     /**
