@@ -56,6 +56,7 @@ class Tnbpay extends Object
 		$response = $client->createRequest()
 			->setFormat(Client::FORMAT_XML)
 			->setUrl(self::URL)
+			->setMethod("post")
 			->setData($data)
 			->setOptions([
 				"sslVerifyPeer" => false,
@@ -93,9 +94,12 @@ class Tnbpay extends Object
 	public function getSign(array $data)
 	{
 		ksort($data);
-		$data = array_filter($data);
+		$data = array_filter($data, function($value) {
+			return $value !== "" && $value !== null;
+		});
 		$string1 = http_build_query($data);
 		$string1 .= "&key={$this->appSecret}";
+		$string1 = urldecode($string1);
 
 		return strtoupper(md5($string1));
 	}
