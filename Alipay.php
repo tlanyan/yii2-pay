@@ -156,9 +156,9 @@ class Alipay extends Object
 	}
 
 	// 兼容上一版本
-    public function getPayParameter(string $orderId, string $subject, string $amount, string $body, string $timeoutExpress = '2h')
+    public function getPayParameter(string $orderId, string $subject, string $amount, string $body)
     {
-	    return $this->getPayParameter($orderId, $subject, $amount, $body, $timeoutExpress);
+	    return $this->getAppPayParameter($orderId, $subject, $amount, $body);
     }
 
     /**
