@@ -12,6 +12,7 @@ namespace tlanyan;
 use Yii;
 use yii\base\Object;
 use yii\httpclient\Client;
+use yii\httpclient\Response;
 
 class Wxpay extends Object
 {
@@ -40,63 +41,98 @@ class Wxpay extends Object
      */
     const ORDER_URL = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
 
+    private function getPostData(string $orderId, int $amount, string $body, string $ip, string $tradeType, string $sceneInfo = "")
+    {
+	    $data = [
+		    'appid' => $this->appid,
+		    'body' => $body,
+		    'mch_id' => $this->mchid,
+		    'nonce_str' => Yii::$app->security->generateRandomString(32),
+		    'notify_url' => $this->notifyUrl,
+		    'out_trade_no' => $orderId,
+		    'spbill_create_ip' => $ip,
+		    'sign_type' => $this->signType,
+		    'total_fee' => $amount,
+		    'trade_type' => $tradeType,
+	    ];
+	    if ($sceneInfo) {
+	    	$data["scene_info"] = $sceneInfo;
+	    }
+    }
+
+    private function makeRequest(array $data)
+    {
+	    $client = new Client();
+	    return $client->createRequest()
+		    ->setMethod('post')
+		    ->setFormat(Client::FORMAT_XML)
+		    ->setUrl(self::ORDER_URL)
+		    ->setData($data)
+		    ->send();
+    }
+
+    private function dealResponse(Response $response, bool $isApp)
+    {
+	    if ($response->isOk) {
+	    	$response->setFormat(Client::FORMAT_XML);
+		    $data = $response->data;
+		    Yii::info($data, $this->logCategory);
+		    if ($data['return_code'] === 'SUCCESS') {
+			    if ($data['result_code'] === 'SUCCESS') {
+			    	if ($isApp) {
+					    return [
+						    'code' => 0,
+						    'prepayid' => $data['prepay_id'],
+					    ];
+				    }
+				    return [
+					    'code' => 0,
+					    'mwebUrl' => $data['mweb_url'],
+				    ];
+			    }
+			    return [
+				    'code' => 1,
+				    'message' => $data['err_code_des'],
+			    ];
+		    } else {
+			    Yii::error($data, $this->logCategory);
+		    }
+	    }
+
+	    return [
+		    'code' => 1,
+		    'message' => 'fail to communicate with wxpay server',
+	    ];
+    }
+
     /**
      * get the pay parameter for the client
      * @var int $orderId
      * @var float $amount
      * @var string $body brief of trade
      * @var string $ip the client ip to pay
-     * @var string $detail detail of this trade
-     * @var string $tradeType
      * @return array
      */
-    public function getPayParameter(int $orderId, int $amount, string $body, string $ip, string $detail = '', string $tradeType = 'APP')
+    public function getPayParameter(string $orderId, int $amount, string $body, string $ip)
     {
-        $postData = [
-            'appid' => $this->appid,
-            'body' => $body,
-            'mch_id' => $this->mchid,
-            'nonce_str' => Yii::$app->security->generateRandomString(32),
-            'notify_url' => $this->notifyUrl,
-            'out_trade_no' => $orderId,
-            'spbill_create_ip' => $ip,
-            'sign_type' => $this->signType,
-            'total_fee' => $amount,
-            'trade_type' => $tradeType,
-        ];
+
+    	$postData = $this->getPostData($orderId, $amount, $body, $ip, "APP");
 
         $postData['sign'] = $this->getSign($postData);
 
-        $client = new Client();
-        $response = $client->createRequest()
-            ->setMethod('post')
-            ->setFormat(Client::FORMAT_XML)
-            ->setUrl(self::ORDER_URL)
-            ->setData($postData)
-            ->send();
-        if ($response->isOk) {
-            $data = $response->data;
-            Yii::info($data, $this->logCategory);
-            if ($data['return_code'] === 'SUCCESS') {
-            	if ($data['result_code'] === 'SUCCESS') {
-            		return [
-            			'code' => 0,
-			            'prepayid' => $data['prepay_id'],
-		            ];
-	            }
-	            return [
-	            	'code' => 1,
-		            'message' => $data['err_code_des'],
-	            ];
-            } else {
-                Yii::error($data, $this->logCategory);
-            }
-        }
+        $response = $this->makeRequest($postData);
 
-	    return [
-		    'code' => 1,
-		    'message' => 'fail to communicate with wxpay server',
-	    ];
+        return $this->dealResponse($response, true);
+    }
+
+	public function getWapPayUrl(string $orderId, int $amount, string $body, string $ip, string $sceneInfo)
+    {
+    	$postData = $this->getPostData($orderId, $amount, $body, $ip, "MWEB", $sceneInfo);
+    	$postData["sign"] = $this->getSign($postData);
+
+    	$response = $this->makeRequest($postData);
+
+    	return $this->dealResponse($response, false);
     }
 
     /**
