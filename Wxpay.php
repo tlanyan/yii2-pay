@@ -76,13 +76,14 @@ class Wxpay extends Object
 	    if ($response->isOk) {
 	    	$response->setFormat(Client::FORMAT_XML);
 		    $data = $response->data;
+		    Yii::info("微信支付返回内容：", $this->logCategory);
 		    Yii::info($data, $this->logCategory);
 		    if ($data['return_code'] === 'SUCCESS') {
 			    if ($data['result_code'] === 'SUCCESS') {
 			    	if ($isApp) {
 					    return [
 						    'code' => 0,
-						    'prepayid' => $data['prepay_id'],
+						    'prepayId' => $data['prepay_id'],
 					    ];
 				    }
 				    return [
@@ -95,6 +96,7 @@ class Wxpay extends Object
 				    'message' => $data['err_code_des'],
 			    ];
 		    } else {
+			    Yii::error("微信支付请求出错，返回内容：", $this->logCategory);
 			    Yii::error($data, $this->logCategory);
 		    }
 	    }
@@ -113,13 +115,14 @@ class Wxpay extends Object
      * @var string $ip the client ip to pay
      * @return array
      */
-    public function getPayParameter(string $orderId, int $amount, string $body, string $ip)
+    public function getPrepayId(string $orderId, int $amount, string $body, string $ip)
     {
 
     	$postData = $this->getPostData($orderId, $amount, $body, $ip, "APP");
-
         $postData['sign'] = $this->getSign($postData);
 
+	    Yii::info("微信支付请求数据：", $this->logCategory);
+	    Yii::info($postData, $this->logCategory);
         $response = $this->makeRequest($postData);
 
         return $this->dealResponse($response, true);
@@ -130,6 +133,8 @@ class Wxpay extends Object
     	$postData = $this->getPostData($orderId, $amount, $body, $ip, "MWEB", $sceneInfo);
     	$postData["sign"] = $this->getSign($postData);
 
+	    Yii::info("微信支付请求数据：", $this->logCategory);
+	    Yii::info($postData, $this->logCategory);
     	$response = $this->makeRequest($postData);
 
     	return $this->dealResponse($response, false);

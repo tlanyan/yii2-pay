@@ -13,6 +13,7 @@ namespace tlanyan;
 use Yii;
 use yii\base\Object;
 use yii\httpclient\Client;
+use yii\httpclient\Response;
 
 class Tnbpay extends Object
 {
@@ -49,8 +50,9 @@ class Tnbpay extends Object
 			"total_fee" => $amount,
 			"notify_url" => $this->notifyUrl,
 		];
-
 		$data["sign"] = $this->getSign($data);
+		Yii::info("请求tnbpay的数据内容：", $this->logCategory);
+		Yii::info($data, $this->logCategory);
 
 		$client = new Client();
 		$response = $client->createRequest()
@@ -62,8 +64,17 @@ class Tnbpay extends Object
 				"sslVerifyPeer" => false,
 			])
 			->send();
+
+		return $this->dealResponse($response);
+	}
+
+	private function dealResponse(Response $response)
+	{
 		if ($response->isOk) {
+			$response->setFormat(Client::FORMAT_XML);
+
 			$res = $response->data;
+			Yii::info("tnbpay请求返回内容：", $this->logCategory);
 			Yii::info($res, $this->logCategory);
 			if ($res["return_code"] === "SUCCESS") {
 				if ($res["result_code"] === "SUCCESS") {

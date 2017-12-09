@@ -117,6 +117,7 @@ class Alipay extends Object
 			'product_code' => self::APP_PRODUCT_CODE,
 		];
 		$request->setNotifyUrl($this->notifyUrl);
+		Yii::info("支付宝请求内容：" . json_encode($bizContent), $this->logCategory);
 		$request->setBizContent(json_encode($bizContent));
 		//这里和普通的接口调用不同，使用的是sdkExecute
 		$response = $aopClient->sdkExecute($request);
@@ -147,6 +148,7 @@ class Alipay extends Object
 			'total_amount' => $amount,
 			'product_code' => self::WAP_PRODUCT_CODE,
 		];
+		Yii::info("支付宝请求内容：" . json_encode($bizContent), $this->logCategory);
 		$request->setNotifyUrl($this->notifyUrl);
 		$request->setBizContent(json_encode($bizContent));
 		$response = $aopClient->pageExecute($request, $httpmethod);
@@ -154,12 +156,6 @@ class Alipay extends Object
 		Yii::info($response, $this->logCategory);
 		return $response;
 	}
-
-	// 兼容上一版本
-    public function getPayParameter(string $orderId, string $subject, string $amount, string $body)
-    {
-	    return $this->getAppPayParameter($orderId, $subject, $amount, $body);
-    }
 
     /**
      * check the sign of callback data
