@@ -58,6 +58,7 @@ class Wxpay extends Object
 	    if ($sceneInfo) {
 	    	$data["scene_info"] = $sceneInfo;
 	    }
+	    return $data;
     }
 
     private function makeRequest(array $data)
